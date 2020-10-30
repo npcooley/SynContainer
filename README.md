@@ -16,7 +16,18 @@ It contains a few additional R packages as well dependencies for these major fiv
 
 It can be tested and used locally with `docker pull npcooley/synextend:latest` and `docker run -i -t --rm synextend sh`.
 
-It can be used as a singularity container on the OSG by specifiying `+SingularityImage = "/cvmfs/singularity.opensciencegrid.org/npcooley/synextend:latest"` in your submit file. In this case the PATH for BLAST and HMMER will need to be set with `export PATH=/blast/ncbi-blast-2.10.1+/bin:$PATH` and `export PATH=/hmmer/hmmer-3.3.1/bin:$PATH` in the wrapper script respectively.
+It can be used as a singularity container on the OSG by specifiying:
+
+`+SingularityImage = "/cvmfs/singularity.opensciencegrid.org/npcooley/synextend:latest"`
+
+in your submit file.
+
+In this case the PATH for BLAST and HMMER will need to be set with
+
+* `export PATH=/blast/ncbi-blast-2.10.1+/bin:$PATH`
+* `export PATH=/hmmer/hmmer-3.3.1/bin:$PATH`
+
+in your executable/wrapper script.
 
 ## Contact
 
