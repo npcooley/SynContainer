@@ -1,8 +1,8 @@
 FROM r-base:4.0.3
 
-# 'docker build --no-cache -t npcooley/synextend .'
+# 'docker build --no-cache -t npcooley/synextend:latest -t npcooley/synextend:1.2.0 .'
 # version after the synextend version / bioconductor release
-# 'docker push npcooley/synextend:latest npcooley/synextend:1.2.0'
+# 'docker push npcooley/synextend'
 # singularity containers will need to start with 'export PATH=/blast/ncbi-blast-x.y.z+/bin:$PATH'
 # singularity containers will need to start with 'export PATH=/hmmer/hmmer-x.y.z/bin:$PATH'
 # 'docker run -i -t --rm npcooley/synextend' will run image locally
