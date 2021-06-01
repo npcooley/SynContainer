@@ -1,6 +1,6 @@
-FROM r-base:4.0.3
+FROM r-base:4.1.0
 
-# 'docker build --no-cache -t npcooley/synextend:latest -t npcooley/synextend:1.2.1 .'
+# 'docker build --no-cache -t npcooley/synextend:latest -t npcooley/synextend:1.3.0 .'
 # version after the synextend version / bioconductor release
 # 'docker push npcooley/synextend'
 # singularity containers will need to start with 'export PATH=/blast/ncbi-blast-x.y.z+/bin:$PATH'
@@ -22,7 +22,7 @@ RUN install.r remotes \
    stringr \
    deSolve
 
-RUN Rscript -e "BiocManager::install(version = '3.12')" && \
+RUN Rscript -e "BiocManager::install(version = '3.13')" && \
    Rscript -e "BiocManager::install(c('DECIPHER', 'SynExtend'))"
 
 # change working directory to install BLAST

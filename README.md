@@ -1,6 +1,6 @@
 # SynExtend Container
 
-A container for using the R package SynExtend. The current version is `1.2.1`
+A container for using the R package SynExtend. The current version is `1.3.0`
 
 ## Usage
 
@@ -12,13 +12,15 @@ This container is built to be a toolbox for working with genomic data in R on th
 * DECIPHER
 * SynExtend
 
-It contains a few additional R packages as well dependencies for these major five. BLAST `2.11.0` and HMMER `3.3.2` are included as well, and their executables have been added to the default PATH. This container is currently built from `r-base:4.0.3`.
+It contains a few additional R packages as well dependencies for these major five. BLAST `2.11.0` and HMMER `3.3.2` are included as well, and their executables have been added to the default PATH. This container is currently built from `r-base:4.1.0`.
 
-It can be tested and used locally with `docker pull npcooley/synextend:1.2.1` and `docker run -i -t --rm synextend sh`.
+Details on SynExtend can be found [here](http://bioconductor.org/packages/release/bioc/html/SynExtend.html).
+
+It can be tested and used locally with `docker pull npcooley/synextend:1.3.0` and `docker run -i -t --rm synextend sh`.
 
 It can be used as a singularity container on the OSG by specifying:
 
-`+SingularityImage = "/cvmfs/singularity.opensciencegrid.org/npcooley/synextend:1.2.1"`
+`+SingularityImage = "/cvmfs/singularity.opensciencegrid.org/npcooley/synextend:1.3.0"`
 
 in your submit file.
 
