@@ -1,6 +1,6 @@
 FROM r-base:4.1.0
 
-# 'docker build --no-cache -t npcooley/synextend:latest -t npcooley/synextend:1.3.0 .'
+# 'docker build --no-cache -t npcooley/synextend:latest -t npcooley/synextend:1.3.1 .'
 # version after the synextend version / bioconductor release
 # 'docker push npcooley/synextend'
 # singularity containers will need to start with 'export PATH=/blast/ncbi-blast-x.y.z+/bin:$PATH'
@@ -8,10 +8,24 @@ FROM r-base:4.1.0
 # 'docker run -i -t --rm npcooley/synextend' will run image locally
 # 'docker run -i -t --rm  -v ~/localdata/:/mnt/mydata/ npcooley/synextend' and remove once it's been closed -- use to check packages, functions, etc...
 
+# version things:
+# blast
+# hmmer
+# MCL
+# BiocVersion
+ENV BLAST_VERSION "2.11.0"
+ENV HMMER_VERSION "3.3.2"
+ENV MCL_VERSION "14-137"
+ENV BIOC_VERSION "3.13"
+
+RUN apt-get update && apt-get install -y \
+   build-essential
+
 RUN apt-get update && \
    apt-get -y install libgmp-dev && \
    apt-get -y install libcurl4-openssl-dev && \
-   apt-get -y install libssl-dev
+   apt-get -y install libssl-dev && \
+   apt-get -y install openmpi-common
    
 RUN install.r remotes \
    BiocManager \
@@ -22,8 +36,7 @@ RUN install.r remotes \
    stringr \
    deSolve
 
-RUN Rscript -e "BiocManager::install(version = '3.13')" && \
-   Rscript -e "BiocManager::install(c('DECIPHER', 'SynExtend'))"
+RUN Rscript -e "BiocManager::install(version = '$BIOC_VERSION') ; BiocManager::install(c('DECIPHER', 'SynExtend'))"
 
 # change working directory to install BLAST
 WORKDIR /blast/
@@ -36,24 +49,49 @@ WORKDIR /blast/
 
 
 # grab BLAST tarball from NCBI
-RUN wget https://ftp.ncbi.nlm.nih.gov/blast/executables/blast+/2.11.0/ncbi-blast-2.11.0+-x64-linux.tar.gz && \
-   tar -zxvpf ncbi-blast-2.11.0+-x64-linux.tar.gz
+RUN wget https://ftp.ncbi.nlm.nih.gov/blast/executables/blast+/$BLAST_VERSION/ncbi-blast-$BLAST_VERSION+-x64-linux.tar.gz && \
+   tar -zxvpf ncbi-blast-$BLAST_VERSION+-x64-linux.tar.gz && \
+   cd /
 
-ENV PATH=/blast/ncbi-blast-2.11.0+/bin:$PATH
-
-# go back to home and build a hmmer working directory
-RUN cd .. 
-WORKDIR /hmmer/
+# PATH will need to updated on the OSG, but is present here for regular docker use...
+ENV PATH=/blast/ncbi-blast-$BLAST_VERSION+/bin:$PATH
 
 # grab HMMER and install
 # there is a make python command missing here
-RUN wget http://eddylab.org/software/hmmer/hmmer-3.3.2.tar.gz
-RUN tar -zxf hmmer-3.3.2.tar.gz
-RUN cd hmmer-3.3.2 \
-  && ./configure --prefix /hmmer/hmmer-3.3.2 \
-  && make \
-  && make install
+WORKDIR /hmmer/
+RUN wget http://eddylab.org/software/hmmer/hmmer-$HMMER_VERSION.tar.gz
+RUN tar -zxvf hmmer-$HMMER_VERSION.tar.gz
+RUN cd hmmer-$HMMER_VERSION && \
+   ./configure --prefix /hmmer/hmmer-$HMMER_VERSION && \
+   make && \
+   make install && \
+   cd /
+
+# PATH will need to updated on the OSG, but is present here for regular docker use...
+ENV PATH=/hmmer/hmmer-$HMMER_VERSION/bin:$PATH
+
+RUN apt-get -y install gcc-9
+
+ENV CC=gcc-9
+ENV CXX=g++-9
+
+WORKDIR /mcl/
+RUN wget https://micans.org/mcl/src/mcl-$MCL_VERSION.tar.gz
+RUN tar -zxvf mcl-$MCL_VERSION.tar.gz --strip-components=1 && \
+   ./configure && \
+	make install && \
+	cd /
+
+#RUN wget https://micans.org/mcl/src/mcl-$MCL_VERSION.tar.gz
+#RUN tar xzf mcl-$MCL_VERSION.tar.gz && \
+#   cd mcl-$MCL_VERSION && \
+#   ./configure --prefix=$HOME/local && \
+#   make install
+	
+RUN unset CC
+RUN unset CXX
 
 WORKDIR /
 
-ENV PATH=/hmmer/hmmer-3.3.2/bin:$PATH
+
+
