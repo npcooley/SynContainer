@@ -1,11 +1,11 @@
 FROM r-base:4.1.0
 
-# 'docker build --no-cache -t npcooley/synextend:latest -t npcooley/synextend:1.3.1 .'
+# 'docker build --no-cache -t npcooley/synextend:latest -t npcooley/synextend:1.3.2 .'
 # version after the synextend version / bioconductor release
 # 'docker push npcooley/synextend'
 # singularity containers will need to start with 'export PATH=/blast/ncbi-blast-x.y.z+/bin:$PATH'
 # singularity containers will need to start with 'export PATH=/hmmer/hmmer-x.y.z/bin:$PATH'
-# 'docker run -i -t --rm npcooley/synextend' will run image locally
+# 'docker run -i -t --rm npcooley/synextend sh' will run image locally
 # 'docker run -i -t --rm  -v ~/localdata/:/mnt/mydata/ npcooley/synextend' and remove once it's been closed -- use to check packages, functions, etc...
 
 # version things:
@@ -25,7 +25,8 @@ RUN apt-get update && \
    apt-get -y install libgmp-dev && \
    apt-get -y install libcurl4-openssl-dev && \
    apt-get -y install libssl-dev && \
-   apt-get -y install openmpi-common
+   apt-get -y install openmpi-common && \
+   apt-get -y install curl
    
 RUN install.r remotes \
    BiocManager \
@@ -37,6 +38,12 @@ RUN install.r remotes \
    deSolve
 
 RUN Rscript -e "BiocManager::install(version = '$BIOC_VERSION') ; BiocManager::install(c('DECIPHER', 'SynExtend'))"
+
+# install edirect tools
+RUN wget ftp://ftp.ncbi.nlm.nih.gov/entrez/entrezdirect/install-edirect.sh && \
+  . ./install-edirect.sh
+# i think this should be PATH=$PATH:$HOME/edirect, but this is what works ...
+ENV PATH=$PATH:root/edirect
 
 # change working directory to install BLAST
 WORKDIR /blast/

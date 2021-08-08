@@ -1,6 +1,6 @@
 # SynExtend Container
 
-A container for using the R package SynExtend. The current version is `1.3.1`
+A container for using the R package SynExtend. The current version is `1.3.2`
 
 ## Usage
 
@@ -12,7 +12,7 @@ This container is built to be a toolbox for working with genomic data in R on th
 * DECIPHER
 * SynExtend
 
-It contains a few additional R packages as well dependencies for these major five. BLAST, HMMER, and MCL are included as well, and their executables have been added to the default PATH. This container is currently built from `r-base:4.1.0`.
+It contains a few additional R packages as well dependencies for these major five. BLAST, HMMER, and MCL are included as well, and their executables have been added to the default PATH. This container also has the NCBI edirect tools, though users will need to supply their own API key. This container is currently built from `r-base:4.1.0`.
 
 Versions:
 1. BLAST `2.11.0`
@@ -30,10 +30,11 @@ It can be used as a singularity container on the OSG by specifying:
 
 in your submit file.
 
-In this case the PATH for BLAST and HMMER will need to be set with
+In this case the PATH for BLAST, HMMER, and edirect will need to be set with:
 
-* `export PATH=/blast/ncbi-blast-2.11.0+/bin:$PATH`
-* `export PATH=/hmmer/hmmer-3.3.2/bin:$PATH`
+* `export PATH=$PATH:/blast/ncbi-blast-2.11.0+/bin`
+* `export PATH=$PATH:/hmmer/hmmer-3.3.2/bin`
+* `export PATH=$PATH:root/edirect`
 
 in your executable/wrapper script.
 
