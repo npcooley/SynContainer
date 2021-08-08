@@ -22,11 +22,11 @@ Versions:
 
 Details on SynExtend can be found [here](http://bioconductor.org/packages/release/bioc/html/SynExtend.html), and details on DECIPHER can be found [here](https://www.bioconductor.org/packages/release/bioc/html/DECIPHER.html).
 
-It can be tested and used locally with `docker pull npcooley/synextend:1.3.1` and `docker run -i -t --rm synextend sh`.
+It can be tested and used locally with `docker pull npcooley/synextend:1.3.2` and `docker run -i -t --rm synextend sh`.
 
 It can be used as a singularity container on the OSG by specifying:
 
-`+SingularityImage = "/cvmfs/singularity.opensciencegrid.org/npcooley/synextend:1.3.0"`
+`+SingularityImage = "/cvmfs/singularity.opensciencegrid.org/npcooley/synextend:1.3.2"`
 
 in your submit file.
 
