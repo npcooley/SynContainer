@@ -1,10 +1,10 @@
 # SynExtend Container
 
-A container for using the R package SynExtend. The current version is `1.3.2`
+A container for using the R package SynExtend. The current version is `1.3.3`
 
 ## Usage
 
-This container is built to be a toolbox for working with genomic data in R on the open science grid. It's current major package list includes:
+This container is built to be a toolbox for working with genomic data in R on the Open Science Grid. It's current major package list includes:
 
 * dendextend
 * ape
@@ -22,11 +22,11 @@ Versions:
 
 Details on SynExtend can be found [here](http://bioconductor.org/packages/release/bioc/html/SynExtend.html), and details on DECIPHER can be found [here](https://www.bioconductor.org/packages/release/bioc/html/DECIPHER.html).
 
-It can be tested and used locally with `docker pull npcooley/synextend:1.3.2` and `docker run -i -t --rm synextend sh`.
+It can be tested and used locally with `docker pull npcooley/synextend:1.3.3` and `docker run -i -t --rm synextend sh`.
 
-It can be used as a singularity container on the OSG by specifying:
+It can be used as a singularity container on the Open Science Grid by specifying:
 
-`+SingularityImage = "/cvmfs/singularity.opensciencegrid.org/npcooley/synextend:1.3.2"`
+`+SingularityImage = "/cvmfs/singularity.opensciencegrid.org/npcooley/synextend:1.3.3"`
 
 in your submit file.
 
@@ -34,7 +34,7 @@ In this case the PATH for BLAST, HMMER, and edirect will need to be set with:
 
 * `export PATH=$PATH:/blast/ncbi-blast-2.11.0+/bin`
 * `export PATH=$PATH:/hmmer/hmmer-3.3.2/bin`
-* `export PATH=$PATH:root/edirect`
+* `export PATH=$PATH:edirect/edirect`
 
 in your executable/wrapper script.
 
