@@ -1,6 +1,6 @@
 FROM r-base:4.1.0
 
-# 'docker build --no-cache -t npcooley/synextend:latest -t npcooley/synextend:1.3.3 .'
+# 'docker build --no-cache -t npcooley/synextend:latest -t npcooley/synextend:1.3.4 .'
 # version after the synextend version / bioconductor release
 # 'docker push npcooley/synextend --all-tags'
 # singularity containers will need to start with 'export PATH=/blast/ncbi-blast-x.y.z+/bin:$PATH'
@@ -18,10 +18,9 @@ ENV HMMER_VERSION "3.3.2"
 ENV MCL_VERSION "14-137"
 ENV BIOC_VERSION "3.13"
 
-RUN apt-get update && apt-get install -y \
-   build-essential
-
+# Dependencies
 RUN apt-get update && \
+   apt-get -y install build-essential && \
    apt-get -y install libgmp-dev && \
    apt-get -y install libcurl4-openssl-dev && \
    apt-get -y install libssl-dev && \
@@ -44,7 +43,24 @@ RUN wget ftp://ftp.ncbi.nlm.nih.gov/entrez/entrezdirect/install-edirect.sh && \
   . ./install-edirect.sh && \
   mkdir /edirect && \
   mv /root/edirect/ /edirect/
-ENV PATH=$PATH:edirect/edirect
+
+ENV PATH=$PATH:/edirect/edirect
+
+# not clear why this don't set up properly initially
+RUN wget ftp.ncbi.nlm.nih.gov/entrez/entrezdirect/xtract.Linux.gz && \
+   gunzip -f xtract.Linux.gz && \
+   chmod +x xtract.Linux && \
+   mv xtract.Linux /edirect/edirect/
+
+RUN wget ftp.ncbi.nlm.nih.gov/entrez/entrezdirect/transmute.Linux.gz && \
+   gunzip -f transmute.Linux.gz && \
+   chmod +x transmute.Linux && \
+   mv transmute.Linux /edirect/edirect/
+
+RUN wget ftp.ncbi.nlm.nih.gov/entrez/entrezdirect/rchive.Linux.gz && \
+   gunzip -f rchive.Linux.gz && \
+   chmod +x rchive.Linux && \
+   mv rchive.Linux /edirect/edirect/
 
 # change working directory to install BLAST
 WORKDIR /blast/
