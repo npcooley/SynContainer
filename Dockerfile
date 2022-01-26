@@ -1,6 +1,6 @@
-FROM r-base:4.1.0
+FROM r-base:4.1.2
 
-# 'docker build --no-cache -t npcooley/synextend:latest -t npcooley/synextend:1.3.4 .'
+# 'docker build --no-cache -t npcooley/synextend:latest -t npcooley/synextend:dev .'
 # version after the synextend version / bioconductor release
 # 'docker push npcooley/synextend --all-tags'
 # singularity containers will need to start with 'export PATH=/blast/ncbi-blast-x.y.z+/bin:$PATH'
@@ -16,7 +16,7 @@ FROM r-base:4.1.0
 ENV BLAST_VERSION "2.11.0"
 ENV HMMER_VERSION "3.3.2"
 ENV MCL_VERSION "14-137"
-ENV BIOC_VERSION "3.13"
+ENV BIOC_VERSION "3.14"
 
 # Dependencies
 RUN apt-get update && \
@@ -38,29 +38,17 @@ RUN install.r remotes \
 
 RUN Rscript -e "BiocManager::install(version = '$BIOC_VERSION') ; BiocManager::install(c('DECIPHER', 'SynExtend'))"
 
-# install edirect tools
-RUN wget ftp://ftp.ncbi.nlm.nih.gov/entrez/entrezdirect/install-edirect.sh && \
-  . ./install-edirect.sh && \
-  mkdir /edirect && \
-  mv /root/edirect/ /edirect/
+COPY DECIPHER_2.21.1.tar.gz ./DECIPHER_2.21.1.tar.gz
+RUN tar -zxvf ./DECIPHER_2.21.1.tar.gz
+   
+RUN R CMD build --no-build-vignettes --no-manual ./DECIPHER && \
+   R CMD INSTALL DECIPHER_2.21.1.tar.gz
 
-ENV PATH=$PATH:/edirect/edirect
+# EDirect
+RUN sh -c "$(curl -fsSL ftp://ftp.ncbi.nlm.nih.gov/entrez/entrezdirect/install-edirect.sh)"
 
-# not clear why this don't set up properly initially
-RUN wget ftp.ncbi.nlm.nih.gov/entrez/entrezdirect/xtract.Linux.gz && \
-   gunzip -f xtract.Linux.gz && \
-   chmod +x xtract.Linux && \
-   mv xtract.Linux /edirect/edirect/
+ENV PATH=$PATH:/root/edirect
 
-RUN wget ftp.ncbi.nlm.nih.gov/entrez/entrezdirect/transmute.Linux.gz && \
-   gunzip -f transmute.Linux.gz && \
-   chmod +x transmute.Linux && \
-   mv transmute.Linux /edirect/edirect/
-
-RUN wget ftp.ncbi.nlm.nih.gov/entrez/entrezdirect/rchive.Linux.gz && \
-   gunzip -f rchive.Linux.gz && \
-   chmod +x rchive.Linux && \
-   mv rchive.Linux /edirect/edirect/
 
 # change working directory to install BLAST
 WORKDIR /blast/
