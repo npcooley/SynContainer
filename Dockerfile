@@ -1,6 +1,6 @@
 FROM r-base:4.1.2
 
-# 'docker build --no-cache -t npcooley/synextend:latest -t npcooley/synextend:dev .'
+# 'docker build --no-cache -t npcooley/synextend:latest -t npcooley/synextend:1.7.6 .'
 # version after the synextend version / bioconductor release
 # 'docker push npcooley/synextend --all-tags'
 # singularity containers will need to start with 'export PATH=/blast/ncbi-blast-x.y.z+/bin:$PATH'
@@ -34,15 +34,24 @@ RUN install.r remotes \
    ape \
    httr \
    stringr \
-   deSolve
+   deSolve \
+   devtools
 
 RUN Rscript -e "BiocManager::install(version = '$BIOC_VERSION') ; BiocManager::install(c('DECIPHER', 'SynExtend'))"
 
-COPY DECIPHER_2.21.1.tar.gz ./DECIPHER_2.21.1.tar.gz
-RUN tar -zxvf ./DECIPHER_2.21.1.tar.gz
+# devtools does not install, but fails with a warning, not an error?
+# RUN Rscript -e "library(devtools) ; install_github(repo = 'npcooley/synextend')"
+
+COPY SynExtend ./SynExtend
+
+RUN R CMD build --no-build-vignettes --no-manual ./SynExtend && \
+   R CMD INSTALL SynExtend_1.7.6.tar.gz
+
+COPY DECIPHER ./DECIPHER
    
 RUN R CMD build --no-build-vignettes --no-manual ./DECIPHER && \
    R CMD INSTALL DECIPHER_2.21.1.tar.gz
+
 
 # EDirect
 RUN sh -c "$(curl -fsSL ftp://ftp.ncbi.nlm.nih.gov/entrez/entrezdirect/install-edirect.sh)"
