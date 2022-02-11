@@ -54,10 +54,12 @@ RUN R CMD build --no-build-vignettes --no-manual ./DECIPHER && \
 
 
 # EDirect
-RUN sh -c "$(curl -fsSL ftp://ftp.ncbi.nlm.nih.gov/entrez/entrezdirect/install-edirect.sh)"
+RUN sh -c "$(curl -fsSL ftp://ftp.ncbi.nlm.nih.gov/entrez/entrezdirect/install-edirect.sh)" && \
+   cp -r /root/edirect/ /edirect/
 
-ENV PATH=$PATH:/root/edirect
+ENV PATH=$PATH:/edirect
 
+RUN rm SynExtend_1.7.6.tar.gz DECIPHER_2.21.1.tar.gz
 
 # change working directory to install BLAST
 WORKDIR /blast/
