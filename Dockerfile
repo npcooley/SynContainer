@@ -1,6 +1,6 @@
 FROM r-base:4.1.2
 
-# 'docker build --no-cache -t npcooley/synextend:latest -t npcooley/synextend:1.7.7 .'
+# 'docker build --no-cache -t npcooley/synextend:latest -t npcooley/synextend:1.7.8 .'
 # version after the synextend version / bioconductor release
 # 'docker push npcooley/synextend --all-tags'
 # singularity containers will need to start with 'export PATH=/blast/ncbi-blast-x.y.z+/bin:$PATH'
@@ -45,7 +45,7 @@ RUN Rscript -e "BiocManager::install(version = '$BIOC_VERSION') ; BiocManager::i
 COPY SynExtend ./SynExtend
 
 RUN R CMD build --no-build-vignettes --no-manual ./SynExtend && \
-   R CMD INSTALL SynExtend_1.7.7.tar.gz
+   R CMD INSTALL SynExtend_1.7.8.tar.gz
 
 COPY DECIPHER ./DECIPHER
    
@@ -59,7 +59,7 @@ RUN sh -c "$(curl -fsSL ftp://ftp.ncbi.nlm.nih.gov/entrez/entrezdirect/install-e
 
 ENV PATH=$PATH:/edirect
 
-RUN rm SynExtend_1.7.7.tar.gz DECIPHER_2.21.1.tar.gz
+RUN rm SynExtend_1.7.8.tar.gz DECIPHER_2.21.1.tar.gz
 
 # change working directory to install BLAST
 WORKDIR /blast/
