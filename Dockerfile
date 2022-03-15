@@ -1,6 +1,6 @@
 FROM r-base:4.1.2
 
-# 'docker build --no-cache -t npcooley/synextend:latest -t npcooley/synextend:1.7.8 .'
+# 'docker build --no-cache -t npcooley/synextend:latest -t npcooley/synextend:1.7.11 .'
 # version after the synextend version / bioconductor release
 # 'docker push npcooley/synextend --all-tags'
 # singularity containers will need to start with 'export PATH=/blast/ncbi-blast-x.y.z+/bin:$PATH'
@@ -34,8 +34,7 @@ RUN install.r remotes \
    ape \
    httr \
    stringr \
-   deSolve \
-   devtools
+   deSolve
 
 RUN Rscript -e "BiocManager::install(version = '$BIOC_VERSION') ; BiocManager::install(c('DECIPHER', 'SynExtend'))"
 
@@ -45,7 +44,7 @@ RUN Rscript -e "BiocManager::install(version = '$BIOC_VERSION') ; BiocManager::i
 COPY SynExtend ./SynExtend
 
 RUN R CMD build --no-build-vignettes --no-manual ./SynExtend && \
-   R CMD INSTALL SynExtend_1.7.8.tar.gz
+   R CMD INSTALL SynExtend_1.7.11.tar.gz
 
 COPY DECIPHER ./DECIPHER
    
@@ -59,7 +58,7 @@ RUN sh -c "$(curl -fsSL ftp://ftp.ncbi.nlm.nih.gov/entrez/entrezdirect/install-e
 
 ENV PATH=$PATH:/edirect
 
-RUN rm SynExtend_1.7.8.tar.gz DECIPHER_2.21.1.tar.gz
+RUN rm SynExtend_1.7.11.tar.gz DECIPHER_2.21.1.tar.gz
 
 # change working directory to install BLAST
 WORKDIR /blast/
@@ -93,17 +92,19 @@ RUN cd hmmer-$HMMER_VERSION && \
 # PATH will need to updated on the OSG, but is present here for regular docker use...
 ENV PATH=/hmmer/hmmer-$HMMER_VERSION/bin:$PATH
 
-RUN apt-get -y install gcc-9
+RUN wget https://raw.githubusercontent.com/micans/mcl/main/build-mcl-21-257.sh
 
-ENV CC=gcc-9
-ENV CXX=g++-9
+# RUN apt-get -y --fix-missing install gcc-9
 
-WORKDIR /mcl/
-RUN wget https://micans.org/mcl/src/mcl-$MCL_VERSION.tar.gz
-RUN tar -zxvf mcl-$MCL_VERSION.tar.gz --strip-components=1 && \
-   ./configure && \
-	make install && \
-	cd /
+# ENV CC=gcc-9
+# ENV CXX=g++-9
+
+# WORKDIR /mcl/
+# RUN wget https://micans.org/mcl/src/mcl-$MCL_VERSION.tar.gz
+# RUN tar -zxvf mcl-$MCL_VERSION.tar.gz --strip-components=1 && \
+#    ./configure && \
+# 	make install && \
+# 	cd /
 
 #RUN wget https://micans.org/mcl/src/mcl-$MCL_VERSION.tar.gz
 #RUN tar xzf mcl-$MCL_VERSION.tar.gz && \
@@ -111,8 +112,8 @@ RUN tar -zxvf mcl-$MCL_VERSION.tar.gz --strip-components=1 && \
 #   ./configure --prefix=$HOME/local && \
 #   make install
 	
-RUN unset CC
-RUN unset CXX
+# RUN unset CC
+# RUN unset CXX
 
 WORKDIR /
 
