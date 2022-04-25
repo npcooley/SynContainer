@@ -1,6 +1,6 @@
 FROM r-base:4.1.2
 
-# 'docker build --no-cache -t npcooley/synextend:latest -t npcooley/synextend:1.7.11 .'
+# 'docker build --no-cache -t npcooley/synextend:latest -t npcooley/synextend:1.7.14 .'
 # version after the synextend version / bioconductor release
 # 'docker push npcooley/synextend --all-tags'
 # singularity containers will need to start with 'export PATH=/blast/ncbi-blast-x.y.z+/bin:$PATH'
@@ -13,7 +13,7 @@ FROM r-base:4.1.2
 # hmmer
 # MCL
 # BiocVersion
-ENV BLAST_VERSION "2.11.0"
+ENV BLAST_VERSION "2.13.0"
 ENV HMMER_VERSION "3.3.2"
 ENV MCL_VERSION "14-137"
 ENV BIOC_VERSION "3.14"
@@ -25,7 +25,8 @@ RUN apt-get update && \
    apt-get -y install libcurl4-openssl-dev && \
    apt-get -y install libssl-dev && \
    apt-get -y install openmpi-common && \
-   apt-get -y install curl
+   apt-get -y install curl && \
+   apt-get -y install libxml2-dev
    
 RUN install.r remotes \
    BiocManager \
@@ -36,7 +37,7 @@ RUN install.r remotes \
    stringr \
    deSolve
 
-RUN Rscript -e "BiocManager::install(version = '$BIOC_VERSION') ; BiocManager::install(c('DECIPHER', 'SynExtend'))"
+RUN Rscript -e "BiocManager::install(version = '$BIOC_VERSION') ; BiocManager::install(c('DECIPHER', 'SynExtend', 'rtracklayer'))"
 
 # devtools does not install, but fails with a warning, not an error?
 # RUN Rscript -e "library(devtools) ; install_github(repo = 'npcooley/synextend')"
@@ -44,7 +45,7 @@ RUN Rscript -e "BiocManager::install(version = '$BIOC_VERSION') ; BiocManager::i
 COPY SynExtend ./SynExtend
 
 RUN R CMD build --no-build-vignettes --no-manual ./SynExtend && \
-   R CMD INSTALL SynExtend_1.7.11.tar.gz
+   R CMD INSTALL SynExtend_1.7.14.tar.gz
 
 COPY DECIPHER ./DECIPHER
    
@@ -58,7 +59,7 @@ RUN sh -c "$(curl -fsSL ftp://ftp.ncbi.nlm.nih.gov/entrez/entrezdirect/install-e
 
 ENV PATH=$PATH:/edirect
 
-RUN rm SynExtend_1.7.11.tar.gz DECIPHER_2.21.1.tar.gz
+RUN rm SynExtend_1.7.14.tar.gz DECIPHER_2.21.1.tar.gz
 
 # change working directory to install BLAST
 WORKDIR /blast/
