@@ -21,7 +21,7 @@ This container is built to be a toolbox for working with genomic data in R on th
 * TreeDist
 * deSolve
 
-It contains a few additional R packages as well dependencies for these major five. BLAST, HMMER, and MCL are included as well, and their executables have been added to the default PATH. This container also has the NCBI edirect tools, though users will need to supply their own API key. This container is currently built from `r-base:4.2.2`.
+It contains several additional R packages as well many required dependencies. BLAST, HMMER, and MCL are included as well, and their executables have been added to the default PATH. This container also has the NCBI edirect tools, though users will need to supply their own API key. This container is currently built from `r-base:4.2.2`.
 
 Versions:
 1. BLAST `2.13.0`
