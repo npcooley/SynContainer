@@ -176,7 +176,16 @@ RUN mkdir installmcl && \
   cd installmcl && \
   wget https://raw.githubusercontent.com/micans/mcl/main/install-this-mcl.sh -o install-this-mcl && \
   chmod u+x install-this-mcl.sh && \
-  ./install-this-mcl.sh 
+  ./install-this-mcl.sh && \
+  cd ..
+
+ENV PATH=$PATH:/root/local/bin
+
+RUN wget https://www.niehs.nih.gov/research/resources/assets/docs/artbinmountrainier2016.06.05linux64.tgz && \
+  tar -xzvf artbinmountrainier2016.06.05linux64.tgz && \
+  rm artbinmountrainier2016.06.05linux64.tgz
+
+ENV PATH=$PATH:/art_bin_MountRainier
 
 # RUN wget https://raw.githubusercontent.com/micans/mcl/main/build-mcl-21-257.sh
 
