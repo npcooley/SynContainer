@@ -43,6 +43,12 @@ RUN apt-get update && \
    apt-get -y install bcftools && \
    apt-get -y install flex && \
    apt-get -y install libfl-dev && \
+   apt-get -y install x11-apps && \
+   apt-get -y install xvfb xauth xfonts-base && \
+   apt-get -y install libcairo2-dev && \
+   apt-get -y install libxt-dev && \
+   apt-get -y install libx11-dev && \
+   apt-get -y install libgtk2.0-dev && \
    apt-get clean && \
    rm -rf /var/lib/apt/lists/*
    
@@ -66,12 +72,12 @@ RUN conda config --add channels defaults && \
    conda config --add channels conda-forge && \
    conda install -c bioconda megahit && \
    conda install -c conda-forge -c bioconda metaplatanus && \
-   conda install fastqsplitter && \
    conda install -c bioconda bowtie2 && \
    conda install -c bioconda hisat2 && \
    conda install -c bioconda minimap2 && \
    conda install -c bioconda fastp && \
-   conda install -c bioconda spades
+   conda install -c bioconda spades && \
+   conda install -c bioconda clinker-py
 
 # R initial dependencies from CRAN
 RUN install.r remotes \
@@ -87,7 +93,8 @@ RUN install.r remotes \
    nlme \
    cluster \
    deSolve \
-   rvest
+   rvest \
+   Cairo
 
 
 # Ensure correct bioc version for DECIPHER and SynExtend
@@ -211,6 +218,4 @@ ENV PATH=$PATH:/art_bin_MountRainier
 # RUN unset CXX
 
 WORKDIR /
-
-
 
