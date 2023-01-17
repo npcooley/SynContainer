@@ -77,7 +77,8 @@ RUN conda config --add channels defaults && \
    conda install -c bioconda minimap2 && \
    conda install -c bioconda fastp && \
    conda install -c bioconda spades && \
-   conda install -c bioconda clinker-py
+   conda install -c bioconda clinker-py && \
+   conda install -c bioconda fastqc
 
 # R initial dependencies from CRAN
 RUN install.r remotes \
