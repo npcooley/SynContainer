@@ -23,41 +23,44 @@ ENV SPADES_VERSION "3.15.5"
 
 # OS Dependencies
 RUN apt-get update && \
-   apt-get -y install build-essential && \
-   apt-get -y install software-properties-common && \
-   apt-get -y install libgmp-dev && \
-   apt-get -y install libcurl4-openssl-dev && \
-   apt-get -y install libssl-dev && \
-   apt-get -y install openmpi-common && \
-   apt-get -y install libopenmpi-dev && \
-   apt-get -y install libzmq3-dev && \
-   apt-get -y install curl && \
-   apt-get -y install libxml2-dev && \
-   apt-get -y install git && \
-   apt-get -y install abyss && \
-   apt-get -y install libboost-all-dev && \
-   apt-get -y install cmake && \
-   apt-get -y install python3 && \
-   apt-get -y install python3-pip && \
-   apt-get -y install samtools && \
-   apt-get -y install bcftools && \
-   apt-get -y install flex && \
-   apt-get -y install libfl-dev && \
-   apt-get -y install x11-apps && \
-   apt-get -y install xvfb xauth xfonts-base && \
-   apt-get -y install libcairo2-dev && \
-   apt-get -y install libxt-dev && \
-   apt-get -y install libx11-dev && \
-   apt-get -y install libgtk2.0-dev && \
+   apt-get -y install build-essential \
+    software-properties-common \
+    libgmp-dev \
+    libcurl4-openssl-dev \
+    libssl-dev \
+    openmpi-common \
+    libopenmpi-dev \
+    libzmq3-dev \
+    curl \
+    libxml2-dev \
+    git \
+    abyss \
+    libboost-all-dev \
+    cmake \
+    python3 \
+    python3-pip \
+    samtools \
+    bcftools \
+    flex \
+    libfl-dev \
+    x11-apps \
+    xvfb xauth xfonts-base \
+    libcairo2-dev \
+    libxt-dev \
+    libx11-dev \
+    libgtk2.0-dev \
+    bioperl \
+    libconfig-yaml-perl \
+    libwww-perl && \
    apt-get clean && \
    rm -rf /var/lib/apt/lists/*
    
 # PIP dependencies
-RUN pip3 install biopython && \
-   pip3 install plotly && \
-   pip3 install pandas && \
-   pip3 install numpy && \
-   pip3 install reportlab
+RUN pip3 install biopython \
+   plotly \
+   pandas \
+   numpy \
+   reportlab
 
 
 # CONDA install
@@ -195,6 +198,15 @@ RUN wget https://www.niehs.nih.gov/research/resources/assets/docs/artbinmountrai
 
 ENV PATH=$PATH:/art_bin_MountRainier
 
+# pbsim3 for long read simulations
+RUN git clone https://github.com/yukiteruono/pbsim3.git && \
+  cd pbsim3 && \
+  autoreconf -f -i && \
+  ./configure && \
+  make
+  
+ENV PATH=$PATH:/pbsim3/src
+
 # RUN wget https://raw.githubusercontent.com/micans/mcl/main/build-mcl-21-257.sh
 
 # RUN apt-get -y --fix-missing install gcc-9
@@ -219,4 +231,3 @@ ENV PATH=$PATH:/art_bin_MountRainier
 # RUN unset CXX
 
 WORKDIR /
-
