@@ -1,6 +1,6 @@
 FROM r-base:4.2.2
 
-# 'docker build --no-cache -t npcooley/synextend:latest -t npcooley/synextend:1.10.1 .'
+# 'docker build --no-cache -t npcooley/synextend:latest -t npcooley/synextend:1.10.2 .'
 # version after the synextend version / bioconductor release
 # 'docker push npcooley/synextend --all-tags'
 # singularity containers will need to start with 'export PATH=/blast/ncbi-blast-x.y.z+/bin:$PATH'
@@ -20,6 +20,7 @@ ENV MCL_VERSION "14-137"
 ENV BIOC_VERSION "3.16"
 ENV SRA_VERSION "3.0.1"
 ENV SPADES_VERSION "3.15.5"
+ENV MASURCA_VERSION "4.1.0"
 
 # OS Dependencies
 RUN apt-get update && \
@@ -51,17 +52,28 @@ RUN apt-get update && \
     libgtk2.0-dev \
     bioperl \
     libconfig-yaml-perl \
-    libwww-perl && \
+    libwww-perl \
+    psmisc \
+    mash && \
    apt-get clean && \
    rm -rf /var/lib/apt/lists/*
    
 # PIP dependencies
-RUN pip3 install biopython \
+RUN pip3 install --break-system-packages biopython \
    plotly \
    pandas \
    numpy \
-   reportlab
+   reportlab \
+   checkm-genome \
+   pysam
 
+# this is not necessarily the right choice for a container that gets passed around the OSG
+# but this can be stashed and sent along as needed
+# this command will tell checkM where it's DB / DBs are located:
+# checkm data setRoot <checkm_data_dir>
+# checkm isn't necessarily the simplest plug and play tool, see github:
+# https://github.com/Ecogenomics/CheckM
+# RUN wget https://data.ace.uq.edu.au/public/CheckM_databases/checkm_data_2015_01_16.tar.gz
 
 # CONDA install
 ENV CONDA_DIR /opt/conda
@@ -73,6 +85,7 @@ ENV PATH=$CONDA_DIR/bin:$PATH
 RUN conda config --add channels defaults && \
    conda config --add channels bioconda && \
    conda config --add channels conda-forge && \
+   conda update -n base -c defaults conda && \
    conda install -c bioconda megahit && \
    conda install -c conda-forge -c bioconda metaplatanus && \
    conda install -c bioconda bowtie2 && \
@@ -81,7 +94,10 @@ RUN conda config --add channels defaults && \
    conda install -c bioconda fastp && \
    conda install -c bioconda spades && \
    conda install -c bioconda clinker-py && \
-   conda install -c bioconda fastqc
+   conda install -c bioconda fastqc && \
+   conda install -c bioconda raven-assembler && \
+   conda install flye && \
+   conda install -c conda-forge -c bioconda -c defaults canu
 
 # R initial dependencies from CRAN
 RUN install.r remotes \
@@ -206,6 +222,23 @@ RUN git clone https://github.com/yukiteruono/pbsim3.git && \
   make
   
 ENV PATH=$PATH:/pbsim3/src
+
+RUN git clone https://github.com/rrwick/Filtlong.git && \
+  cd Filtlong && \
+  make -j && \
+  cd ..
+
+ENV PATH=$PATH:/Filtlong/bin
+
+# masurca
+# this still errors out ... I'm assuming there's missing undocumented dependency
+# RUN wget https://github.com/alekseyzimin/masurca/releases/download/v$MASURCA_VERSION/MaSuRCA-$MASURCA_VERSION.tar.gz && \
+#   tar -xzvf MaSuRCA-$MASURCA_VERSION.tar.gz && \
+#   cd MaSuRCA-$MASURCA_VERSION && \
+#   /MaSuRCA-$MASURCA_VERSION/install.sh && \
+#   cd .. && \
+#   rm MaSuRCA-$MASURCA_VERSION.tar.gz
+
 
 # RUN wget https://raw.githubusercontent.com/micans/mcl/main/build-mcl-21-257.sh
 

@@ -1,6 +1,6 @@
 # SynExtend Container
 
-A container for using the R package SynExtend. The current version is `1.10.2`
+A container for using the R package SynExtend. The current version is `1.10.1`
 
 ## Usage
 
