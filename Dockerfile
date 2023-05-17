@@ -1,6 +1,6 @@
-FROM r-base:4.2.2
+FROM r-base:4.3.0
 
-# 'docker build --no-cache -t npcooley/synextend:latest -t npcooley/synextend:1.10.2 .'
+# 'docker build --no-cache -t npcooley/synextend:latest -t npcooley/synextend:1.12.0 .'
 # version after the synextend version / bioconductor release
 # 'docker push npcooley/synextend --all-tags'
 # singularity containers will need to start with 'export PATH=/blast/ncbi-blast-x.y.z+/bin:$PATH'
@@ -14,11 +14,11 @@ FROM r-base:4.2.2
 # MCL
 # BiocVersion
 # SPADES
-ENV BLAST_VERSION "2.13.0"
+ENV BLAST_VERSION "2.14.0"
 ENV HMMER_VERSION "3.3.2"
 ENV MCL_VERSION "14-137"
-ENV BIOC_VERSION "3.16"
-ENV SRA_VERSION "3.0.1"
+ENV BIOC_VERSION "3.17"
+ENV SRA_VERSION "3.0.5"
 ENV SPADES_VERSION "3.15.5"
 ENV MASURCA_VERSION "4.1.0"
 
@@ -54,7 +54,8 @@ RUN apt-get update && \
     libconfig-yaml-perl \
     libwww-perl \
     psmisc \
-    mash && \
+    mash \
+    cwltool && \
    apt-get clean && \
    rm -rf /var/lib/apt/lists/*
    
@@ -97,7 +98,11 @@ RUN conda config --add channels defaults && \
    conda install -c bioconda fastqc && \
    conda install -c bioconda raven-assembler && \
    conda install flye && \
-   conda install -c conda-forge -c bioconda -c defaults canu
+   conda install -c conda-forge -c bioconda -c defaults canu && \
+   # conda install -c conda-forge -c bioconda medaka && \
+   conda install -c bioconda -c conda-forge diamond && \
+   conda install -c bioconda pplacer && \
+   conda install -c bioconda prodigal
 
 # R initial dependencies from CRAN
 RUN install.r remotes \
