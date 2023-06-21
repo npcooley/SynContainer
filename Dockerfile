@@ -83,6 +83,8 @@ RUN wget --quiet https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86
 ENV PATH=$CONDA_DIR/bin:$PATH
 
 # CONDA dependencies
+# ncurses installed explicitly because it doesn't seem to behave correctly as a dependency
+# https://stackoverflow.com/questions/72103046/libtinfo-so-6-no-version-information-available-message-using-conda-environment
 RUN conda config --add channels defaults && \
    conda config --add channels bioconda && \
    conda config --add channels conda-forge && \
@@ -102,7 +104,8 @@ RUN conda config --add channels defaults && \
    # conda install -c conda-forge -c bioconda medaka && \
    conda install -c bioconda -c conda-forge diamond && \
    conda install -c bioconda pplacer && \
-   conda install -c bioconda prodigal
+   conda install -c bioconda prodigal && \
+   conda install -c conda-forge ncurses
 
 # R initial dependencies from CRAN
 RUN install.r remotes \
