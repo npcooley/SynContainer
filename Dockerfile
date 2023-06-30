@@ -183,7 +183,9 @@ COPY ANIcalculator_v1.tgz .
 RUN tar -zxvf ANIcalculator_v1.tgz
 ENV PATH=$PATH:/ANIcalculator_v1
 RUN chown root:root ANIcalculator_v1 && \
-  chmod +x ANIcalculator_v1/* && \
+  chown root:root ANIcalculator_v1/* && \
+  chmod 00755 ANIcalculator_v1 && \
+  chmod 00755 ANIcalculator_v1/* && \
   rm ANIcalculator_v1.tgz
 
 
