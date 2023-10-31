@@ -1,12 +1,20 @@
-FROM r-base:4.3.0
+FROM r-base:4.3.1
 
-# 'docker build --no-cache -t npcooley/synextend:latest -t npcooley/synextend:1.12.0 .'
-# version after the synextend version / bioconductor release
-# 'docker push npcooley/synextend --all-tags'
-# singularity containers will need to start with 'export PATH=/blast/ncbi-blast-x.y.z+/bin:$PATH'
-# singularity containers will need to start with 'export PATH=/hmmer/hmmer-x.y.z/bin:$PATH'
-# 'docker run -i -t --rm npcooley/synextend sh' will run image locally
-# 'docker run -i -t --rm  -v ~/localdata/:/mnt/mydata/ npcooley/synextend' and remove once it's been closed -- use to check packages, functions, etc...
+# 'docker build --no-cache -t npcooley/synextend:latest -t npcooley/synextend:1.18.0 .'
+# version after the bioconductor release -- this makes more sense i think ...
+# 'docker push npcooley/synextend:1.18.0'
+# singularity containers may need have their paths adjusted, i.e. 'export PATH=/blast/ncbi-blast-x.y.z+/bin:$PATH'
+# 'docker run -i -t --rm npcooley/synextend:1.18.0 sh' will run image locally
+# 'docker run -i -t --rm  -v ~/localdata/:/mnt/mydata/ npcooley/synextend:1.18.0' and remove once it's been closed -- use to check packages, functions, etc...
+
+# order of operations:
+# 1 -- get system packages and dependencies
+# 2 -- grab base R packages
+# 3 -- grab bioc packages and install from source
+# 4 -- things install or compiled from tarballs
+# 5 -- pip things
+# 6 -- conda things
+# 7 -- commented out prior pieces of prior installations
 
 # version things:
 # blast
@@ -17,14 +25,17 @@ FROM r-base:4.3.0
 ENV BLAST_VERSION "2.14.0"
 ENV HMMER_VERSION "3.3.2"
 ENV MCL_VERSION "14-137"
-ENV BIOC_VERSION "3.17"
+ENV BIOC_VERSION "3.18"
 ENV SRA_VERSION "3.0.5"
-ENV SPADES_VERSION "3.15.5"
+# ENV SPADES_VERSION "3.15.5" # apt gets this now
 ENV MASURCA_VERSION "4.1.0"
 
 # OS Dependencies
+# libtbb2 -- requested by bowtie2, seems to be deprecated, replaced with libtbbmalloc2
 RUN apt-get update && \
-   apt-get -y install build-essential \
+   apt-get -y install nano \
+    bash-completion \
+    build-essential \
     software-properties-common \
     libgmp-dev \
     libcurl4-openssl-dev \
@@ -35,78 +46,49 @@ RUN apt-get update && \
     curl \
     libxml2-dev \
     git \
-    abyss \
     libboost-all-dev \
     cmake \
     python3 \
     python3-pip \
+    python3-distutils \
+    wget \
+    pigz \
+    ca-certificates \
+    libconfig-yaml-perl \
+    libwww-perl \
+    psmisc \
     samtools \
     bcftools \
+    bowtie2 \
     flex \
     libfl-dev \
+    default-jdk \
+    cwltool \
+    libtbbmalloc2 \
     x11-apps \
-    xvfb xauth xfonts-base \
+    xvfb \
+    xauth \
+    xfonts-base \
     libcairo2-dev \
     libxt-dev \
     libx11-dev \
     libgtk2.0-dev \
     bioperl \
-    libconfig-yaml-perl \
-    libwww-perl \
-    psmisc \
-    mash \
-    cwltool && \
-   apt-get clean && \
+    spades \
+    megahit \
+    abyss \
+    flye \
+    canu \
+    unicycler \
+    pilon \
+    cat-bat \
+    minimap2 \
+    hisat2 \
+    diamond-aligner \
+    mash && \
+   apt-get -y autoclean && \
    rm -rf /var/lib/apt/lists/*
    
-# PIP dependencies
-RUN pip3 install --break-system-packages biopython \
-   plotly \
-   pandas \
-   numpy \
-   reportlab \
-   checkm-genome \
-   pysam
-
-# this is not necessarily the right choice for a container that gets passed around the OSG
-# but this can be stashed and sent along as needed
-# this command will tell checkM where it's DB / DBs are located:
-# checkm data setRoot <checkm_data_dir>
-# checkm isn't necessarily the simplest plug and play tool, see github:
-# https://github.com/Ecogenomics/CheckM
-# RUN wget https://data.ace.uq.edu.au/public/CheckM_databases/checkm_data_2015_01_16.tar.gz
-
-# CONDA install
-ENV CONDA_DIR /opt/conda
-RUN wget --quiet https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O ~/miniconda.sh && \
-   /bin/bash ~/miniconda.sh -b -p /opt/conda
-ENV PATH=$CONDA_DIR/bin:$PATH
-
-# CONDA dependencies
-# ncurses installed explicitly because it doesn't seem to behave correctly as a dependency
-# https://stackoverflow.com/questions/72103046/libtinfo-so-6-no-version-information-available-message-using-conda-environment
-RUN conda config --add channels defaults && \
-   conda config --add channels bioconda && \
-   conda config --add channels conda-forge && \
-   conda update -n base -c defaults conda && \
-   conda install -c bioconda megahit && \
-   conda install -c conda-forge -c bioconda metaplatanus && \
-   conda install -c bioconda bowtie2 && \
-   conda install -c bioconda hisat2 && \
-   conda install -c bioconda minimap2 && \
-   conda install -c bioconda fastp && \
-   conda install -c bioconda spades && \
-   conda install -c bioconda clinker-py && \
-   conda install -c bioconda fastqc && \
-   conda install -c bioconda raven-assembler && \
-   conda install flye && \
-   conda install -c conda-forge -c bioconda -c defaults canu && \
-   # conda install -c conda-forge -c bioconda medaka && \
-   conda install -c bioconda -c conda-forge diamond && \
-   conda install -c bioconda pplacer && \
-   conda install -c bioconda prodigal && \
-   conda install -c conda-forge ncurses
-
 # R initial dependencies from CRAN
 RUN install.r remotes \
    BiocManager \
@@ -122,12 +104,11 @@ RUN install.r remotes \
    cluster \
    deSolve \
    rvest \
-   Cairo
-
+   Cairo \
+   aricode
 
 # Ensure correct bioc version for DECIPHER and SynExtend
 RUN Rscript -e "BiocManager::install(version = '$BIOC_VERSION') ; BiocManager::install(c('DECIPHER', 'SynExtend', 'rtracklayer', 'Rsamtools'), type = 'source')"
-
 
 # EDirect
 RUN sh -c "$(curl -fsSL ftp://ftp.ncbi.nlm.nih.gov/entrez/entrezdirect/install-edirect.sh)" && \
@@ -156,7 +137,6 @@ RUN cd hmmer-$HMMER_VERSION && \
    
 WORKDIR /
 
-# PATH will need to updated on the OSG, but is present here for regular docker use...
 ENV PATH=/hmmer/hmmer-$HMMER_VERSION/bin:$PATH
 
 # SRATools
@@ -188,27 +168,6 @@ RUN chown root:root ANIcalculator_v1 && \
   chmod 00755 ANIcalculator_v1/* && \
   rm ANIcalculator_v1.tgz
 
-
-# SPAdes 
-# currenly installing from conda? this installation hits a segfault ...
-# RUN wget http://cab.spbu.ru/files/release$SPADES_VERSION/SPAdes-$SPADES_VERSION-Linux.tar.gz && \
-#    tar -xzvf SPAdes-$SPADES_VERSION-Linux.tar.gz && \
-#    rm SPAdes-$SPADES_VERSION-Linux.tar.gz
-# ENV PATH=$PATH:/SPAdes-$SPADES_VERSION-Linux/bin
-
-# Unicycler assembler
-RUN git clone https://github.com/rrwick/Unicycler.git && \
-   cd Unicycler && \
-   python3 setup.py install && \
-   cd ..
-
-# SKESA assembler
-RUN git clone https://github.com/ncbi/SKESA && \
-   cd SKESA && \
-   make -f Makefile.nongs && \
-   cd ..
-ENV PATH=$PATH:/SKESA/
-
 RUN mkdir installmcl && \
   cd installmcl && \
   wget https://raw.githubusercontent.com/micans/mcl/main/install-this-mcl.sh -o install-this-mcl && \
@@ -218,27 +177,99 @@ RUN mkdir installmcl && \
 
 ENV PATH=$PATH:/root/local/bin
 
-RUN wget https://www.niehs.nih.gov/research/resources/assets/docs/artbinmountrainier2016.06.05linux64.tgz && \
-  tar -xzvf artbinmountrainier2016.06.05linux64.tgz && \
-  rm artbinmountrainier2016.06.05linux64.tgz
-
-ENV PATH=$PATH:/art_bin_MountRainier
-
-# pbsim3 for long read simulations
-RUN git clone https://github.com/yukiteruono/pbsim3.git && \
-  cd pbsim3 && \
-  autoreconf -f -i && \
-  ./configure && \
-  make
-  
-ENV PATH=$PATH:/pbsim3/src
-
-RUN git clone https://github.com/rrwick/Filtlong.git && \
-  cd Filtlong && \
-  make -j && \
+RUN git clone https://github.com/eXascaleInfolab/LFR-Benchmark_UndirWeightOvp.git && \
+  cd LFR-Benchmark_UndirWeightOvp && \
+  make && \
   cd ..
 
-ENV PATH=$PATH:/Filtlong/bin
+ENV PATH=$PATH:/LFR-Benchmark_UndirWeightOvp
+
+
+# PIP dependencies
+RUN pip3 install --break-system-packages biopython \
+   plotly \
+   pandas \
+   numpy \
+   reportlab \
+   checkm-genome \
+   pysam
+
+# this is not necessarily the right choice for a container that gets passed around the OSG
+# but this can be stashed and sent along as needed
+# this command will tell checkM where it's DB / DBs are located:
+# checkm data setRoot <checkm_data_dir>
+# checkm isn't necessarily the simplest plug and play tool, see github:
+# https://github.com/Ecogenomics/CheckM
+# RUN wget https://data.ace.uq.edu.au/public/CheckM_databases/checkm_data_2015_01_16.tar.gz
+
+# CONDA install
+ENV CONDA_DIR /opt/conda
+RUN wget --quiet https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O ~/miniconda.sh && \
+   /bin/bash ~/miniconda.sh -b -p /opt/conda
+ENV PATH=$CONDA_DIR/bin:$PATH
+
+# CONDA dependencies
+# ncurses installed explicitly because it doesn't seem to behave correctly as a dependency
+# https://stackoverflow.com/questions/72103046/libtinfo-so-6-no-version-information-available-message-using-conda-environment
+RUN conda config --add channels defaults && \
+   conda config --add channels bioconda && \
+   conda config --add channels conda-forge && \
+   conda update -n base -c defaults conda && \
+   conda install -c bioconda clinker-py && \
+   conda install -c bioconda fastqc
+
+# install SPAdes from source, the provided tarball faults under debian
+# RUN wget http://cab.spbu.ru/files/release$SPADES_VERSION/SPAdes-$SPADES_VERSION.tar.gz && \
+#   tar -xzvf SPAdes-$SPADES_VERSION.tar.gz && \
+#   rm SPAdes-$SPADES_VERSION.tar.gz && \
+#   cd SPAdes-$SPADES_VERSION && \
+#   ./spades_compile.sh && \
+#   cd ..
+
+# ENV PATH=$PATH:/SPAdes-$SPADES_VERSION/bin
+
+# SPAdes 
+# currenly installing from conda? this installation hits a segfault ...
+# RUN wget http://cab.spbu.ru/files/release$SPADES_VERSION/SPAdes-$SPADES_VERSION-Linux.tar.gz && \
+#    tar -xzvf SPAdes-$SPADES_VERSION-Linux.tar.gz && \
+#    rm SPAdes-$SPADES_VERSION-Linux.tar.gz
+# ENV PATH=$PATH:/SPAdes-$SPADES_VERSION-Linux/bin
+
+# Unicycler assembler
+# RUN git clone https://github.com/rrwick/Unicycler.git && \
+#    cd Unicycler && \
+#    python3 setup.py install && \
+#    cd ..
+
+# SKESA assembler
+# RUN git clone https://github.com/ncbi/SKESA && \
+#    cd SKESA && \
+#    make -f Makefile.nongs && \
+#    cd ..
+# ENV PATH=$PATH:/SKESA/
+
+# RUN wget https://www.niehs.nih.gov/research/resources/assets/docs/artbinmountrainier2016.06.05linux64.tgz && \
+#   tar -xzvf artbinmountrainier2016.06.05linux64.tgz && \
+#   rm artbinmountrainier2016.06.05linux64.tgz
+
+# ENV PATH=$PATH:/art_bin_MountRainier
+
+# pbsim3 for long read simulations
+# RUN git clone https://github.com/yukiteruono/pbsim3.git && \
+#   cd pbsim3 && \
+#   autoreconf -f -i && \
+#   ./configure && \
+#   make && \
+#   cd ..
+  
+# ENV PATH=$PATH:/pbsim3/src
+
+# RUN git clone https://github.com/rrwick/Filtlong.git && \
+#   cd Filtlong && \
+#   make -j && \
+#   cd ..
+
+# ENV PATH=$PATH:/Filtlong/bin
 
 # masurca
 # this still errors out ... I'm assuming there's missing undocumented dependency
@@ -249,28 +280,6 @@ ENV PATH=$PATH:/Filtlong/bin
 #   cd .. && \
 #   rm MaSuRCA-$MASURCA_VERSION.tar.gz
 
-
-# RUN wget https://raw.githubusercontent.com/micans/mcl/main/build-mcl-21-257.sh
-
-# RUN apt-get -y --fix-missing install gcc-9
-
-# ENV CC=gcc-9
-# ENV CXX=g++-9
-
-# WORKDIR /mcl/
-# RUN wget https://micans.org/mcl/src/mcl-$MCL_VERSION.tar.gz
-# RUN tar -zxvf mcl-$MCL_VERSION.tar.gz --strip-components=1 && \
-#    ./configure && \
-# 	make install && \
-# 	cd /
-
-#RUN wget https://micans.org/mcl/src/mcl-$MCL_VERSION.tar.gz
-#RUN tar xzf mcl-$MCL_VERSION.tar.gz && \
-#   cd mcl-$MCL_VERSION && \
-#   ./configure --prefix=$HOME/local && \
-#   make install
-	
-# RUN unset CC
-# RUN unset CXX
-
 WORKDIR /
+
+CMD ["bash"]
