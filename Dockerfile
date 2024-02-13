@@ -85,6 +85,7 @@ RUN apt-get update && \
     minimap2 \
     hisat2 \
     diamond-aligner \
+    mmseqs2 \
     mash && \
    apt-get -y autoclean && \
    rm -rf /var/lib/apt/lists/*
@@ -168,6 +169,13 @@ RUN chown root:root ANIcalculator_v1 && \
   chmod 00755 ANIcalculator_v1/* && \
   rm ANIcalculator_v1.tgz
 
+# mcl's install script references $HOME, which in this container is the 
+# directory /root ... this is fine for local docker jobs,
+# but is not fine on the OSG when this is run as a singularity containers
+# I do not know where else $HOME is referenced, but it doesn't appear to be anywhere else
+# so we just change it and see what happens...
+ENV HOME=/usr
+
 RUN mkdir installmcl && \
   cd installmcl && \
   wget https://raw.githubusercontent.com/micans/mcl/main/install-this-mcl.sh -o install-this-mcl && \
@@ -175,7 +183,9 @@ RUN mkdir installmcl && \
   ./install-this-mcl.sh && \
   cd ..
 
-ENV PATH=$PATH:/root/local/bin
+ENV HOME=/root
+
+ENV PATH=$PATH:/usr/local/bin
 
 RUN git clone https://github.com/eXascaleInfolab/LFR-Benchmark_UndirWeightOvp.git && \
   cd LFR-Benchmark_UndirWeightOvp && \
