@@ -73,6 +73,8 @@ RUN apt-get update && \
     libxt-dev \
     libx11-dev \
     libgtk2.0-dev \
+    libglpk-dev \
+    libxslt-dev \
     bioperl \
     spades \
     megahit \
